@@ -153,8 +153,14 @@ echo 'NEXT_PUBLIC_API_URL=http://localhost:8001/api' > order-tracker-ui/.env.loc
 
 ## Time Spent
 
-~3 hours total: backend models/ingestion/tests ≈ 1.5 h, frontend ≈ 1 h,
-smoke-testing both failure modes end-to-end + docs ≈ 0.5 h.
+~1 hour total, AI-assisted (built with Claude Code):
+
+- Project setup (Postgres via Docker, Django scaffold, Next.js scaffold) ≈ 15 min
+- Backend models, ingestion/reconciliation logic, 13 tests ≈ 20 min
+- Frontend list + detail pages ≈ 10 min
+- End-to-end verification (duplicate/out-of-order/conflict scenarios against
+  the live API, browser screenshots) + debugging a local port conflict ≈ 15 min
+- Documentation ≈ 5 min
 
 ## Tradeoffs
 
