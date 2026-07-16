@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: order-events-db
+    environment:
+      POSTGRES_DB: order_events
+      POSTGRES_USER: order_events
+      POSTGRES_PASSWORD: order_events
+    ports:
+      # Host port 5433 to avoid clashing with any locally running Postgres.
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U order_events"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:

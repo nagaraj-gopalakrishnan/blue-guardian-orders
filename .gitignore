@@ -1,0 +1,17 @@
+# Python / Django
+__pycache__/
+*.pyc
+.venv/
+order-events-api/.env
+db.sqlite3
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+order-tracker-ui/.env.local
+*.tsbuildinfo
+next-env.d.ts
+
+# OS / editor
+.DS_Store
