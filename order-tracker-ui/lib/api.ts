@@ -21,6 +21,13 @@ export interface OrderDetail extends Order {
   events: OrderEvent[];
 }
 
+export interface Paginated<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+}
+
 async function apiFetch<T>(path: string): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, { cache: "no-store" });
   if (!res.ok) {
@@ -29,8 +36,8 @@ async function apiFetch<T>(path: string): Promise<T> {
   return res.json();
 }
 
-export function getOrders(): Promise<Order[]> {
-  return apiFetch<Order[]>("/orders/");
+export function getOrders(): Promise<Paginated<Order>> {
+  return apiFetch<Paginated<Order>>("/orders/");
 }
 
 export function getOrder(orderId: string): Promise<OrderDetail> {

@@ -8,8 +8,11 @@ export const dynamic = "force-dynamic";
 
 export default async function OrderListPage() {
   let orders: Order[];
+  let total: number;
   try {
-    orders = await getOrders();
+    const page = await getOrders();
+    orders = page.results;
+    total = page.count;
   } catch {
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-red-800">
@@ -26,7 +29,7 @@ export default async function OrderListPage() {
       <div className="mb-6 flex items-baseline justify-between">
         <h1 className="text-2xl font-semibold tracking-tight">Orders</h1>
         <p className="text-sm text-gray-500">
-          {orders.length} order{orders.length === 1 ? "" : "s"}
+          {total} order{total === 1 ? "" : "s"}
         </p>
       </div>
 

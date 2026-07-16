@@ -153,11 +153,13 @@ class ReadEndpointTests(APITestCase):
             WEBHOOK_URL, payload(order_id="ORD-B", status_="paid", ts="2026-07-16T09:30:00Z"), format="json"
         )
 
-    def test_list_orders(self):
+    def test_list_orders_is_paginated(self):
         resp = self.client.get("/api/orders/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(resp.data), 2)
-        by_id = {o["order_id"]: o for o in resp.data}
+        self.assertEqual(resp.data["count"], 2)
+        self.assertIn("next", resp.data)
+        self.assertIn("previous", resp.data)
+        by_id = {o["order_id"]: o for o in resp.data["results"]}
         self.assertEqual(by_id["ORD-A"]["current_status"], "filled")
         self.assertEqual(by_id["ORD-B"]["current_status"], "paid")
 

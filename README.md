@@ -87,7 +87,7 @@ python manage.py test
 | Method | Path | Purpose |
 |---|---|---|
 | POST | `/api/webhooks/order-events/` | Ingest an event (idempotent) |
-| GET | `/api/orders/` | All orders with reconciled current state |
+| GET | `/api/orders/` | Paginated list (`{count, next, previous, results}`, 50/page) of orders with reconciled current state |
 | GET | `/api/orders/<order_id>/` | One order + full event history |
 
 ### Webhook payload
@@ -123,6 +123,25 @@ curl -X POST $W -H "$H" -d '{"order_id":"ORD-1","status":"executed","event_times
 curl -X POST $W -H "$H" -d '{"order_id":"ORD-1","status":"paid","event_timestamp":"2026-07-16T11:00:00Z","source":"payment_processor"}'
 ```
 
+## Troubleshooting
+
+**"Could not reach the orders API" in the frontend** almost always means the
+URL in `NEXT_PUBLIC_API_URL` isn't this project's Django server. Common cause:
+another app already listening on port 8000 (check with `lsof -nP -i :8000`).
+Either free the port, or run Django elsewhere and point the UI at it:
+
+```bash
+python manage.py runserver 8001
+echo 'NEXT_PUBLIC_API_URL=http://localhost:8001/api' > order-tracker-ui/.env.local
+# restart `npm run dev` after changing .env.local
+```
+
+## Screenshots
+
+| Order list | Order detail (out-of-order case) |
+|---|---|
+| ![Order list](docs/screenshots/order-list.png) | ![Order detail](docs/screenshots/order-detail.png) |
+
 ## Data Model
 
 - **`Order`** — one row per `order_id`; holds the reconciled projection
@@ -154,8 +173,6 @@ smoke-testing both failure modes end-to-end + docs ≈ 0.5 h.
 - **Webhook is unauthenticated.** Fine for a local exercise; in production
   it would verify an HMAC signature per source and likely enqueue events for
   async processing instead of ingesting synchronously.
-- **No pagination** on the list endpoints — trivial to add with DRF's
-  `PageNumberPagination` once order volume justifies it.
 - **Trusting `event_timestamp` from the source.** The whole design keys off
   the sender's clock; if upstream clocks skew badly, resolution follows the
   skew. Mitigation would need per-source sequence numbers, which the payload
