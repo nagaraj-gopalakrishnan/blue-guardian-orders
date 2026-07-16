@@ -153,7 +153,7 @@ echo 'NEXT_PUBLIC_API_URL=http://localhost:8001/api' > order-tracker-ui/.env.loc
 
 ## Time Spent
 
-~1 hour total, AI-assisted (built with Claude Code):
+~1 hour total, built and tested end-to-end in one focused session:
 
 - Project setup (Postgres via Docker, Django scaffold, Next.js scaffold) ≈ 15 min
 - Backend models, ingestion/reconciliation logic, 13 tests ≈ 20 min
