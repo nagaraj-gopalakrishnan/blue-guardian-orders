@@ -7,9 +7,9 @@ presents a single, deterministic current state per order.
 
 ```
 blue-guardian-orders/
-├── docker-compose.yml      # PostgreSQL 16 (host port 5433)
-├── order-events-api/       # Django 5.2 + DRF backend
-└── order-tracker-ui/       # Next.js 15 + Tailwind CSS frontend
+├── docker-compose.yml      # Full stack: PostgreSQL 16 + backend + frontend
+├── order-events-api/       # Django 5.2 + DRF backend (has its own Dockerfile)
+└── order-tracker-ui/       # Next.js 15 + Tailwind CSS frontend (has its own Dockerfile)
 ```
 
 ## Conflict Resolution Strategy
@@ -40,18 +40,31 @@ Implementation: [`order-events-api/orders/services.py`](order-events-api/orders/
 
 ## How to Run
 
-Prerequisites: Docker, Python 3.12+ (developed on 3.14), Node 18.18+.
-
-### 1. Database
+### Option A — everything in Docker (one command)
 
 ```bash
-docker compose up -d          # PostgreSQL 16 on host port 5433
+docker compose up -d --build
+```
+
+That starts all three services: PostgreSQL, the Django API (migrations run
+automatically on startup) at http://localhost:8000, and the Next.js UI at
+http://localhost:3000. If 8000 or 3000 are taken on your host, copy
+`.env.example` to `.env` and set `BACKEND_PORT` / `FRONTEND_PORT`.
+
+### Option B — run apps locally (DB in Docker)
+
+Prerequisites: Docker, Python 3.12+ (developed on 3.14), Node 18.18+.
+
+#### 1. Database
+
+```bash
+docker compose up -d db       # PostgreSQL 16 on host port 5433
 ```
 
 (Port **5433** is used on the host to avoid clashing with any local Postgres
 on 5432. Override with `DB_PORT` if needed — see `order-events-api/.env.example`.)
 
-### 2. Backend (Django) — http://localhost:8000
+#### 2. Backend (Django) — http://localhost:8000
 
 ```bash
 cd order-events-api
@@ -61,7 +74,7 @@ python manage.py migrate
 python manage.py runserver 8000
 ```
 
-### 3. Frontend (Next.js) — http://localhost:3000
+#### 3. Frontend (Next.js) — http://localhost:3000
 
 ```bash
 cd order-tracker-ui
@@ -78,6 +91,10 @@ copy `.env.local.example` to `.env.local` to point it elsewhere.
 conflicts, the timestamp tie-break, validation, and the read endpoints:
 
 ```bash
+# Option A (in Docker):
+docker compose exec backend python manage.py test
+
+# Option B (local venv):
 cd order-events-api
 python manage.py test
 ```

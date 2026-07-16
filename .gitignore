@@ -13,5 +13,8 @@ order-tracker-ui/.env.local
 *.tsbuildinfo
 next-env.d.ts
 
+# Docker compose port overrides
+/.env
+
 # OS / editor
 .DS_Store

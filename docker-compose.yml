@@ -8,6 +8,7 @@ services:
       POSTGRES_PASSWORD: order_events
     ports:
       # Host port 5433 to avoid clashing with any locally running Postgres.
+      # Only needed for running Django outside Docker or inspecting with psql.
       - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -16,6 +17,32 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+
+  backend:
+    build: ./order-events-api
+    container_name: order-events-api
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,backend
+    ports:
+      # Change with BACKEND_PORT in a root .env if 8000 is taken on your host.
+      - "${BACKEND_PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build: ./order-tracker-ui
+    container_name: order-tracker-ui
+    environment:
+      # The UI fetches server-side, so it talks to the backend over the
+      # internal Docker network, not through the host port.
+      NEXT_PUBLIC_API_URL: http://backend:8000/api
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    depends_on:
+      - backend
 
 volumes:
   pgdata:
